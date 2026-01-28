@@ -12,13 +12,4 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
-  server: {
-    proxy: {
-      "/api_anwb": {
-        target: "https://api.anwb.nl",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api_anwb/, ""),
-      },
-    },
-  },
 });
