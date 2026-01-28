@@ -27,6 +27,9 @@ use([
 import { vuetify } from "./plugins/vuetify";
 import "@mdi/font/css/materialdesignicons.css";
 
+import "leaflet";
+import "leaflet/dist/leaflet.css";
+
 const app = createApp(App).use(vuetify);
 app.component("v-chart", VueECharts);
 app.mount("#app");
