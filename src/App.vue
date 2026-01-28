@@ -39,7 +39,7 @@ function toggleDark() {
         <DynamischePrijzen />
         <Waterhoogte />
         <Droogte />
-        <Luchtkwaliteit />
+        <!-- <Luchtkwaliteit /> -->
         <Griep />
       </v-container>
     </v-main>
