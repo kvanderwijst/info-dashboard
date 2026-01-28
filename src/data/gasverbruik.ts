@@ -1,4 +1,4 @@
-export const gasverbruik = [
+export const gasverbruik: [string, number][] = [
   ["2025-12-01", 4.6],
   ["2025-12-02", 4.7],
   ["2025-12-03", 4],

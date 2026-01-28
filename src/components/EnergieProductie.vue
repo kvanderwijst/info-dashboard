@@ -149,9 +149,12 @@ const chartOption = computed(() => ({
     const data = (seriesData.value[s.key] ?? []).map((d) => [
       d.validfrom,
       d.volume / 1e6,
-    ]);
+    ]) as [string | number, number | null][];
     if (s.key === "demand" && data.length > 0) {
-      data[data.length - 1][1] = null;
+      const lastDataPoint = data[data.length - 1];
+      if (lastDataPoint) {
+        lastDataPoint[1] = null;
+      }
     }
     return {
       name: s.label,

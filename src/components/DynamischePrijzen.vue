@@ -27,6 +27,7 @@ import { ref, computed, onMounted } from "vue";
 import VChart from "vue-echarts";
 import * as echarts from "echarts";
 import BaseChart from "./BaseChart.vue";
+import type { Ref } from "vue";
 
 import { useEnergyPrices } from "@/composables/useEnergyPrices";
 

@@ -167,15 +167,15 @@ const optionHDD = computed(() => ({
 const scatterData = computed(() => {
   if (!handleOpenMeteo.dataDaily.value) return [];
 
-  const actualByDate = new Map(gasverbruik);
+  const actualByDate = new Map(gasverbruik as [string, number][]);
 
   return handleOpenMeteo.dataDaily.value.time
     ?.map((date: string, index: number) => [
       date,
       predictGas(handleOpenMeteo.dataDaily.value.temperature_2m_mean[index], 1),
     ])
-    .filter(([date]) => actualByDate.has(date))
-    .map(([date, predicted]) => ({
+    .filter(([date]: [string, number]) => actualByDate.has(date))
+    .map(([date, predicted]: [string, number]) => ({
       hdd: predicted,
       actual: actualByDate.get(date)!,
       date,
@@ -206,10 +206,12 @@ const optionCorrelationHDD = computed(() => ({
   series: [
     {
       type: "scatter",
-      data: scatterData.value?.map((point) => ({
-        value: [point.hdd, point.actual],
-        date: point.date, // 👈 extra metadata
-      })),
+      data: scatterData.value?.map(
+        (point: { hdd: any; actual: any; date: any }) => ({
+          value: [point.hdd, point.actual],
+          date: point.date,
+        }),
+      ),
     },
     {
       type: "line",

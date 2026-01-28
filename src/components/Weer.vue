@@ -73,10 +73,8 @@
   </v-row>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useTheme } from "vuetify";
-import { watch } from "vue";
-
 const theme = useTheme();
 import { onMounted } from "vue";
 

@@ -3,7 +3,9 @@ import Papa from "papaparse";
 
 export function useGriepData() {
   const weeks = ref<string[]>([]);
-  const series = ref<{ name: string; type: string; data: number[] }[]>([]);
+  const series = ref<{ name: string; type: string; data: (number | null)[] }[]>(
+    [],
+  );
   const loading = ref(false);
   const error = ref<string | null>(null);
 
@@ -32,7 +34,9 @@ export function useGriepData() {
       }
 
       // headers = years
-      const headers = Object.keys(rows[0]).filter((h) => h !== "");
+      const headers = Object.keys(rows[0] as Record<string, any>).filter(
+        (h) => h !== "",
+      );
 
       // x-axis
       weeks.value = rows.map((row: any) => row[""].replace(/"/g, ""));
