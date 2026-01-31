@@ -1,5 +1,8 @@
 <template>
   <v-row>
+    <v-col cols="12">
+      <h3>Luchtvervuiling</h3>
+    </v-col>
     <v-col cols="12" md="6">
       <v-card>
         <v-card-title
