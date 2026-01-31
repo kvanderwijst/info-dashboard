@@ -16,8 +16,8 @@ import merge from "lodash.merge";
 import VChart from "vue-echarts";
 import type { EChartsType } from "echarts";
 import { use } from "echarts/core";
-import { MarkLineComponent } from "echarts/components";
-use([MarkLineComponent]);
+import { MarkLineComponent, MarkAreaComponent } from "echarts/components";
+use([MarkLineComponent, MarkAreaComponent]);
 
 import { useEChartsTheme } from "@/composables/useEChartsTheme";
 

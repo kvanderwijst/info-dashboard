@@ -2,7 +2,9 @@
   <v-row>
     <v-col cols="12" md="6">
       <v-card>
-        <v-card-title>Huidige luchtkwaliteitsindex</v-card-title>
+        <v-card-title
+          >Huidige luchtkwaliteitsindex ({{ selectedFormula }})</v-card-title
+        >
         <v-card-text>
           <div>
             <l-map
@@ -22,16 +24,19 @@
                   station.geometry.longitude,
                 ]"
                 :radius="8"
-                :fill-color="getColorAndName(station.latest_value)[0]"
+                :fill-color="
+                  limitsByRating[station.latest_rating]?.color || 'lightgrey'
+                "
                 :fill-opacity="0.8"
                 :color="'rgba(0,0,0,0.5)'"
                 :weight="1"
+                @click="selectedStationId = station.id"
               >
                 <l-tooltip direction="top" :offset="[0, -6]" :opacity="0.9">
                   <b>{{ station.display_name }}</b
-                  >: {{ getColorAndName(station.latest_value)[1] }} ({{
-                    station.latest_value
-                  }})
+                  >: ({{ station.latest_value }},
+                  {{ station.latest_rating }})<br />Station id:
+                  {{ station.number }}
                 </l-tooltip>
               </l-circle-marker>
             </l-map>
@@ -39,11 +44,31 @@
         </v-card-text>
       </v-card>
     </v-col>
+    <v-col cols="12" md="6">
+      <v-card>
+        <v-card-title
+          >Gemeten {{ selectedFormula }} afgelopen 7 dagen in
+          {{ stationsById[selectedStationId]?.display_name }}</v-card-title
+        >
+        <v-card-text>
+          <v-select
+            v-model="selectedFormula"
+            :items="formulas"
+            label="Stof"
+            density="compact"
+            hide-details /><BaseChart
+            :option="chartMeasurementsForStationOption"
+        /></v-card-text>
+      </v-card>
+    </v-col>
   </v-row>
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from "vue";
+import { onMounted, computed, ref, watch } from "vue";
+import VChart from "vue-echarts";
+import * as echarts from "echarts";
+import BaseChart from "./BaseChart.vue";
 import {
   LMap,
   LTileLayer,
@@ -52,50 +77,128 @@ import {
   LTooltip,
 } from "@vue-leaflet/vue-leaflet";
 import { useLuchtmeetnet } from "@/composables/useLuchtmeetnet";
+import { getLkiStyle } from "@/constants/luchtkwaliteitkleuren";
 
-const { fetchStations, fetchMeasurements, getStationsWithLatestValue } =
-  useLuchtmeetnet();
+const {
+  stationsById,
+  measurements,
+  measurementsForStation,
+  componentLimits,
+  fetchStations,
+  fetchMeasurements,
+  fetchMeasurementsForStation,
+  fetchComponentLimits,
+  getStationsWithLatestValue,
+} = useLuchtmeetnet();
+
+const selectedStationId = ref("1ad4a380-b77e-4c28-9618-8e4f2ec39153");
+const selectedFormula = ref<"NO2" | "NO" | "PM25" | "PM10">("PM25");
+
+const formulas = [
+  { title: "NO₂", value: "NO2" },
+  { title: "NO", value: "NO" },
+  { title: "PM2.5", value: "PM25" },
+  { title: "PM10", value: "PM10" },
+];
+
+interface Limit {
+  rating: number;
+  lowerband: number | null;
+  upperband: number;
+  color: string;
+  type: string;
+}
+const limitsByRating = computed<Record<number, Limit>>(() => {
+  if (!componentLimits.value) return {};
+  const map: Record<number, Limit> = {};
+
+  for (const limit of componentLimits.value.limits) {
+    const newcolor = getLkiStyle(limit.rating).plot_color;
+    limit.color = newcolor;
+    map[limit.rating] = limit;
+  }
+
+  return map;
+});
+const bands = computed(() =>
+  Object.values(limitsByRating.value).map((l) => ({
+    itemStyle: { color: getLkiStyle(l.rating).plot_color },
+    label: { show: false },
+    data: [[{ yAxis: l.lowerband ?? 0 }, { yAxis: l.upperband }]],
+  })),
+);
+
+const bandSeries = computed(() =>
+  bands.value.map((b) => ({
+    type: "line",
+    silent: true,
+    data: [],
+    markArea: {
+      silent: true,
+      ...b,
+    },
+  })),
+);
 
 const now = new Date();
 const twoHourAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
-
-function getColorAndName(value: number | null) {
-  switch (value) {
-    case 0:
-      return ["rgb(42,99,246)", "Goed"];
-    case 1:
-      return ["rgb(42,99,246)", "Goed"];
-    case 2:
-      return ["rgb(78,173,249)", "Goed"];
-    case 3:
-      return ["rgb(161,199,250)", "Goed"];
-    case 4:
-      return ["rgb(255,255,206)", "Matig"];
-    case 5:
-      return ["rgb(255,255,163)", "Matig"];
-    case 6:
-      return ["rgb(255,255,85)", "Matig"];
-    case 7:
-      return ["rgb(247,202,69)", "Onvoldoende"];
-    case 8:
-      return ["rgb(241,155,56)", "Onvoldoende"];
-    case 9:
-      return ["rgb(236,90,41)", "Slecht"];
-    case 10:
-      return ["rgb(234,58,36)", "Slecht"];
-    case 11:
-      return ["rgb(152,65,210)", "Zeer slecht"];
-    default:
-      return ["#95a5a6", "Geen data"];
-  }
-}
+const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
 onMounted(async () => {
   await fetchStations();
-  await fetchMeasurements(twoHourAgo.toISOString(), now.toISOString());
+  await fetchMeasurements(
+    twoHourAgo.toISOString(),
+    now.toISOString(),
+    selectedFormula.value,
+  );
+  await fetchComponentLimits(selectedFormula.value);
 });
 
+watch(selectedFormula, async (formula) => {
+  await fetchMeasurements(twoHourAgo.toISOString(), now.toISOString(), formula);
+  await fetchComponentLimits(formula);
+});
+
+watch(
+  [selectedStationId, selectedFormula],
+  async ([newStationId, newFormula]) => {
+    if (!newStationId) return;
+
+    await fetchMeasurementsForStation(
+      newStationId,
+      sevenDaysAgo.toISOString(),
+      now.toISOString(),
+      newFormula,
+    );
+  },
+  { immediate: true },
+);
+
 const stationsWithValues = computed(() => getStationsWithLatestValue());
+
+const chartMeasurementsForStationOption = computed(() => ({
+  tooltip: {
+    trigger: "axis",
+  },
+  xAxis: {
+    type: "time",
+  },
+  yAxis: {
+    type: "value",
+  },
+  series: [
+    ...bandSeries.value,
+    {
+      name: "Luchtkwaliteitsindex",
+      type: "line",
+      data: measurementsForStation.value
+        .filter((m) => m.value >= 0)
+        .map((m) => [m.timestamp_measured, m.value]),
+      smooth: true,
+      showSymbol: false,
+    },
+  ],
+}));
 </script>
 
 <style scoped>
