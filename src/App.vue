@@ -37,6 +37,7 @@ watchEffect(() => {
 const activeId = ref<string | null>(null);
 
 onMounted(() => {
+  document.title = "Info-dashboard";
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((e) => {

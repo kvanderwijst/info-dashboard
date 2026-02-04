@@ -2,7 +2,7 @@ import { createApp } from "vue";
 import App from "./App.vue";
 
 import { use } from "echarts/core";
-import { LineChart, BarChart, ScatterChart } from "echarts/charts";
+import { LineChart, BarChart, ScatterChart, GaugeChart } from "echarts/charts";
 import {
   GridComponent,
   TooltipComponent,
@@ -22,6 +22,7 @@ use([
   TitleComponent,
   LegendComponent,
   SVGRenderer,
+  GaugeChart,
 ]);
 
 import { vuetify } from "./plugins/vuetify";
