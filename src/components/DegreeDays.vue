@@ -2,6 +2,10 @@
   <v-row>
     <v-col cols="12">
       <h3>Heating degree days en gasvoorspellingen</h3>
+      <p>
+        HDD (Heating Degree Days) is berekend als {{ baseTempHDD }}°C –
+        (gemiddelde temperatuur per dag).
+      </p>
     </v-col>
   </v-row>
   <v-row>
@@ -42,6 +46,48 @@
         </v-card-text>
       </v-card>
     </v-col>
+    <v-col cols="12" sm="4">
+      <v-card>
+        <v-card-title class="text-wrap"
+          >Gasverbruikcoëfficient dit seizoen</v-card-title
+        >
+        <v-card-text>
+          <div class="voorspelling-vandaag">
+            <div class="center">
+              <p class="voorspelling-main">
+                {{ gasConsumptionPerHDD.toFixed(3) ?? "N/A" }} m³/HDD
+              </p>
+
+              <p
+                v-if="hddCoeffChangePct1 !== null"
+                :key="hddCoeffChangePct1"
+                class="voorspelling-extra"
+              >
+                (<span
+                  :class="hddCoeffChangePct1 > 0 ? 'text-red' : 'text-green'"
+                  >{{ hddCoeffChangePct1 > 0 ? "+" : ""
+                  }}{{ hddCoeffChangePct1.toFixed(0) }}%
+                </span>
+                t.o.v. 2024-2025)
+              </p>
+
+              <p
+                v-if="hddCoeffChangePct2 !== null"
+                :key="hddCoeffChangePct2"
+                class="voorspelling-extra"
+              >
+                (<span
+                  :class="hddCoeffChangePct2 > 0 ? 'text-red' : 'text-green'"
+                  >{{ hddCoeffChangePct2 > 0 ? "+" : ""
+                  }}{{ hddCoeffChangePct2.toFixed(0) }}%
+                </span>
+                t.o.v. 2023-2024)
+              </p>
+            </div>
+          </div>
+        </v-card-text></v-card
+      >
+    </v-col>
   </v-row>
   <v-row>
     <v-col cols="12" md="6">
@@ -50,10 +96,7 @@
           >Relatie tussen dagtemperatuur (HDD) en gasverbruik
         </v-card-title>
         <v-card-text>
-          <div class="slider-container">
-            HDD (Heating Degree Days) is berekend als {{ baseTempHDD }}°C –
-            (gemiddelde temperatuur per dag).
-          </div>
+          <div class="slider-container"></div>
           <BaseChart :option="optionCorrelationHDD" />
         </v-card-text>
       </v-card>
@@ -67,7 +110,7 @@
           <div class="slider-container">
             <div class="slider-row">
               <label>
-                Gas per HDD: {{ gasConsumptionPerHDD.toFixed(3) }} m³
+                Gas per HDD: {{ gasConsumptionPerHDD.toFixed(3) }} m³/HDD
               </label>
               <input
                 type="range"
@@ -106,6 +149,8 @@ import { useOpenMeteo } from "@/composables/useOpenMeteo";
 import { gasverbruik } from "@/data/gasverbruik";
 
 const handleOpenMeteo = useOpenMeteo();
+const gasConsumptionPerHDD_2023_2024 = 0.408;
+const gasConsumptionPerHDD_2024_2025 = 0.42;
 const gasConsumptionPerHDD = ref(0.458);
 const daysBack = ref(21);
 const baseTempHDD = 15.5;
@@ -193,6 +238,13 @@ function percentChange(
 }
 
 const gasChangePct = computed(() => percentChange(gasForDay(0), gasForDay(-1)));
+
+const hddCoeffChangePct1 = computed(() =>
+  percentChange(gasConsumptionPerHDD.value, gasConsumptionPerHDD_2024_2025),
+);
+const hddCoeffChangePct2 = computed(() =>
+  percentChange(gasConsumptionPerHDD.value, gasConsumptionPerHDD_2023_2024),
+);
 
 const optionHDD = computed(() => ({
   xAxis: { type: "time" },
