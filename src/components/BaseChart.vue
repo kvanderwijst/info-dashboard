@@ -27,6 +27,7 @@ const chart = ref<EChartsType | null>(null);
 
 const baseOption = computed(() => ({
   color: colors.value,
+  backgroundColor: "transparent",
   tooltip: { trigger: "axis" },
   grid: { left: 64, right: 32 },
 }));

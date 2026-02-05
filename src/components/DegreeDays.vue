@@ -5,21 +5,33 @@
     </v-col>
   </v-row>
   <v-row>
-    <v-col cols="6" md="4">
-      <v-card
-        ><v-card-text
-          >Voorspelling gasverbruik vandaag:<br />
-          <b>{{ gasForDay(0)?.toFixed(1) ?? "N/A" }} m³</b>
-          <span v-if="gasChangePct !== null" :key="gasChangePct">
-            (<span :class="gasChangePct > 0 ? 'text-red' : 'text-green'"
-              >{{ gasChangePct > 0 ? "+" : "" }}{{ gasChangePct.toFixed(0) }}%
-            </span>
-            t.o.v. gisteren)</span
-          ></v-card-text
-        ></v-card
+    <v-col cols="12" sm="4">
+      <v-card>
+        <v-card-title>Voorspelling gasverbruik vandaag</v-card-title>
+        <v-card-text>
+          <div class="voorspelling-vandaag">
+            <div class="center">
+              <p class="voorspelling-main">
+                {{ gasForDay(0)?.toFixed(1) ?? "N/A" }} m³
+              </p>
+
+              <p
+                v-if="gasChangePct !== null"
+                :key="gasChangePct"
+                class="voorspelling-extra"
+              >
+                (<span :class="gasChangePct > 0 ? 'text-red' : 'text-green'"
+                  >{{ gasChangePct > 0 ? "+" : ""
+                  }}{{ gasChangePct.toFixed(0) }}%
+                </span>
+                t.o.v. gisteren)
+              </p>
+            </div>
+          </div>
+        </v-card-text></v-card
       >
     </v-col>
-    <v-col cols="6" md="4">
+    <v-col cols="12" sm="4">
       <v-card>
         <v-card-title>Huidig gasverbruik van vandaag</v-card-title>
         <v-card-text>
@@ -376,6 +388,27 @@ const optionUsageGauge = computed(() => ({
 .gauge-chart {
   .chart {
     height: 180px;
+  }
+}
+
+.voorspelling-vandaag {
+  height: 180px;
+  text-align: center;
+  font-size: 1.3em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-family: sans-serif;
+
+  .voorspelling-main {
+    font-size: 32px;
+    color: rgb(50, 102, 186);
+  }
+
+  .voorspelling-extra {
+    font-size: 14px;
+    color: rgb(136, 136, 136);
   }
 }
 </style>
