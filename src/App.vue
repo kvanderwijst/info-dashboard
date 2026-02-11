@@ -18,8 +18,8 @@ function toggleDark() {
 }
 
 const sections = [
-  { id: "weer", title: "Weer" },
   { id: "degree-days", title: "Voorspelling gasverbruik" },
+  { id: "weer", title: "Weer" },
   { id: "energie-productie", title: "Energie productie" },
   { id: "dynamische-prijzen", title: "Dynamische prijzen" },
   { id: "waterhoogte", title: "Waterhoogte" },
@@ -87,11 +87,11 @@ onMounted(() => {
 
     <v-main>
       <v-container fluid>
-        <section id="weer" class="scroll-section">
-          <Weer />
-        </section>
         <section id="degree-days" class="scroll-section">
           <DegreeDays />
+        </section>
+        <section id="weer" class="scroll-section">
+          <Weer />
         </section>
         <section id="energie-productie" class="scroll-section">
           <EnergieProductie />

@@ -20,11 +20,10 @@ import BaseChart from "./BaseChart.vue";
 
 import { useGriepData } from "@/composables/useGriepData";
 import { getCurrentISOWeek } from "@/helpers/weeknum";
+import { useAutoRefresh } from "@/composables/useAutorefresh";
 const { weeks, series, fetchGriepData, loading, error } = useGriepData();
 
-onMounted(() => {
-  fetchGriepData();
-});
+useAutoRefresh(fetchGriepData, 2 * 60 * 60); // refresh every 2 hours
 
 const selectedYears = ["2024/2025", "2025/2026"];
 

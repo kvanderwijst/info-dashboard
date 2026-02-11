@@ -30,11 +30,12 @@ import BaseChart from "./BaseChart.vue";
 import type { Ref } from "vue";
 
 import { useEnergyPrices } from "@/composables/useEnergyPrices";
+import { useAutoRefresh } from "@/composables/useAutorefresh";
 
 const electricityPrices = useEnergyPrices();
 const gasPrices = useEnergyPrices();
 
-onMounted(() => {
+function fetchAll() {
   const today = new Date();
   today.setHours(1, 0, 0, 0);
 
@@ -58,7 +59,9 @@ onMounted(() => {
     oneYearAgo.toISOString(),
     tomorrow.toISOString(),
   );
-});
+}
+
+useAutoRefresh(fetchAll, 30 * 60); // refresh every 30 minutes
 
 const now = new Date().getTime();
 

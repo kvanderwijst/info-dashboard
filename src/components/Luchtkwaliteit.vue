@@ -81,6 +81,7 @@ import {
 } from "@vue-leaflet/vue-leaflet";
 import { useLuchtmeetnet } from "@/composables/useLuchtmeetnet";
 import { getLkiStyle } from "@/constants/luchtkwaliteitkleuren";
+import { useAutoRefresh } from "@/composables/useAutorefresh";
 
 const {
   stationsById,
@@ -147,7 +148,7 @@ const now = new Date();
 const twoHourAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
 const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-onMounted(async () => {
+async function fetchAll() {
   await fetchStations();
   await fetchMeasurements(
     twoHourAgo.toISOString(),
@@ -155,7 +156,9 @@ onMounted(async () => {
     selectedFormula.value,
   );
   await fetchComponentLimits(selectedFormula.value);
-});
+}
+
+useAutoRefresh(fetchAll, 30 * 60); // refresh every 30 minutes
 
 watch(selectedFormula, async (formula) => {
   await fetchMeasurements(twoHourAgo.toISOString(), now.toISOString(), formula);

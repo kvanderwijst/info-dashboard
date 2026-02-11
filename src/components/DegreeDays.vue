@@ -93,17 +93,6 @@
     <v-col cols="12" md="6">
       <v-card>
         <v-card-title
-          >Relatie tussen dagtemperatuur (HDD) en gasverbruik
-        </v-card-title>
-        <v-card-text>
-          <div class="slider-container"></div>
-          <BaseChart :option="optionCorrelationHDD" />
-        </v-card-text>
-      </v-card>
-    </v-col>
-    <v-col cols="12" md="6">
-      <v-card>
-        <v-card-title
           >Voorspeld gasverbruik a.d.h.v. dagtemperatuur (HDD)
         </v-card-title>
         <v-card-text>
@@ -135,6 +124,17 @@
         </v-card-text>
       </v-card>
     </v-col>
+    <v-col cols="12" md="6">
+      <v-card>
+        <v-card-title
+          >Relatie tussen dagtemperatuur (HDD) en gasverbruik
+        </v-card-title>
+        <v-card-text>
+          <div class="slider-container"></div>
+          <BaseChart :option="optionCorrelationHDD" />
+        </v-card-text>
+      </v-card>
+    </v-col>
   </v-row>
 </template>
 
@@ -147,6 +147,7 @@ import BaseChart from "./BaseChart.vue";
 import { useHomewizardGas } from "@/composables/useHomewizard";
 import { useOpenMeteo } from "@/composables/useOpenMeteo";
 import { gasverbruik } from "@/data/gasverbruik";
+import { useAutoRefresh } from "@/composables/useAutorefresh";
 
 const handleOpenMeteo = useOpenMeteo();
 const gasConsumptionPerHDD_2023_2024 = 0.408;
@@ -181,10 +182,10 @@ onMounted(() => {
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 2);
   tomorrow.setHours(0, 0, 0, 0);
-
-  fetchWeather();
-  fetchGas();
 });
+
+useAutoRefresh(fetchGas, 5 * 60);
+useAutoRefresh(fetchWeather, 60 * 60);
 
 let timeout: number | undefined;
 watch(daysBack, (newValue, oldValue) => {

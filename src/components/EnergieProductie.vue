@@ -35,6 +35,7 @@ import {
   NedForecastClassification,
   NedActivity,
 } from "@/constants/ned";
+import { useAutoRefresh } from "@/composables/useAutorefresh";
 
 const SERIES = [
   {
@@ -92,7 +93,7 @@ function formatedOffsetDay(offset: number) {
   return formatDate(date);
 }
 
-onMounted(async () => {
+function fetchAll() {
   fetchMultipleSeries(
     SERIES.map((s) => ({
       key: s.key,
@@ -119,7 +120,9 @@ onMounted(async () => {
       },
     },
   ]);
-});
+}
+
+useAutoRefresh(fetchAll, 30 * 60); // refresh every 30 minutes
 
 const chartOption = computed(() => ({
   legend: {
