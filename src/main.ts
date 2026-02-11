@@ -13,6 +13,19 @@ import { SVGRenderer } from "echarts/renderers";
 
 import VueECharts from "vue-echarts";
 
+import Highcharts from "highcharts";
+import HighchartsVue from "highcharts-vue";
+
+// Force valid locale
+Highcharts.setOptions({
+  lang: {
+    locale: "nl-NL",
+  },
+  chart: {
+    borderColor: "transparent",
+  },
+});
+
 use([
   LineChart,
   BarChart,
@@ -33,4 +46,5 @@ import "leaflet/dist/leaflet.css";
 
 const app = createApp(App).use(vuetify);
 app.component("v-chart", VueECharts);
+app.use(HighchartsVue);
 app.mount("#app");

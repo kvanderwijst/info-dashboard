@@ -19,6 +19,8 @@
     "dotenv": "^17.2.3",
     "echarts": "^6.0.0",
     "express": "^5.2.1",
+    "highcharts": "^12.5.0",
+    "highcharts-vue": "^2.0.1",
     "leaflet": "^1.9.4",
     "lodash.merge": "^4.6.2",
     "papaparse": "^5.5.3",

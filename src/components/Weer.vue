@@ -68,6 +68,36 @@
       </v-card>
     </v-col>
   </v-row>
+  <v-row>
+    <v-col cols="12" md="6">
+      <v-card>
+        <v-card-text>
+          <highcharts :options="options_temperatuur" />
+        </v-card-text>
+      </v-card>
+    </v-col>
+    <v-col cols="12" md="6">
+      <v-card>
+        <v-card-text>
+          <highcharts :options="options_bewolking" />
+        </v-card-text>
+      </v-card>
+    </v-col>
+    <v-col cols="12" md="6">
+      <v-card>
+        <v-card-text>
+          <highcharts :options="options_neerslag" />
+        </v-card-text>
+      </v-card>
+    </v-col>
+    <v-col cols="12" md="6">
+      <v-card>
+        <v-card-text>
+          <highcharts :options="options_neerslagsom" />
+        </v-card-text>
+      </v-card>
+    </v-col>
+  </v-row>
 </template>
 
 <script setup lang="ts">
@@ -75,6 +105,7 @@ import { useTheme } from "vuetify";
 const theme = useTheme();
 import { onMounted, ref } from "vue";
 import { useAutoRefresh } from "@/composables/useAutoRefresh";
+import type { Options, YAxisOptions } from "highcharts";
 
 onMounted(() => {
   // Prevent loading the script multiple times
@@ -105,6 +136,59 @@ function updateMap() {
 
 // refresh every 30 minutes
 useAutoRefresh(updateMap, 30 * 60);
+
+// Get KNMI expert ensemble values
+const url_temperatuur =
+  "https://cdn.knmi.nl/knmi/json/page/weer/waarschuwingen_verwachtingen/ensemble/iPluim/260_Expert_99999.json";
+const url_bewolking =
+  "https://cdn.knmi.nl/knmi/json/page/weer/waarschuwingen_verwachtingen/ensemble/iPluim/260_Expert_20010.json";
+const url_neerslag =
+  "https://cdn.knmi.nl/knmi/json/page/weer/waarschuwingen_verwachtingen/ensemble/iPluim/260_Expert_13021.json";
+const url_neerslagsom =
+  "https://cdn.knmi.nl/knmi/json/page/weer/waarschuwingen_verwachtingen/ensemble/iPluim/260_Expert_13011.json";
+
+const options_temperatuur = ref({});
+const options_bewolking = ref({});
+const options_neerslag = ref({});
+const options_neerslagsom = ref({});
+
+function adjustOptions(options: Options): Options {
+  const yAxes: YAxisOptions[] = Array.isArray(options.yAxis)
+    ? options.yAxis
+    : options.yAxis
+      ? [options.yAxis]
+      : [{} as YAxisOptions]; // fallback empty axis if undefined
+  return {
+    ...options,
+    chart: {
+      ...options.chart,
+      borderColor: "transparent",
+    },
+    yAxis: [yAxes[0] || ({} as YAxisOptions)], // only show the first y-axis
+  };
+}
+
+onMounted(async () => {
+  try {
+    const responses = await Promise.all([
+      fetch(url_temperatuur),
+      fetch(url_bewolking),
+      fetch(url_neerslag),
+      fetch(url_neerslagsom),
+    ]);
+
+    const [temperatuur, bewolking, neerslag, neerslagsom] = await Promise.all(
+      responses.map((r) => r.json()),
+    );
+
+    options_temperatuur.value = adjustOptions(temperatuur);
+    options_bewolking.value = adjustOptions(bewolking);
+    options_neerslag.value = adjustOptions(neerslag);
+    options_neerslagsom.value = adjustOptions(neerslagsom);
+  } catch (error) {
+    console.error("KNMI fetch failed:", error);
+  }
+});
 </script>
 
 <style scoped>
