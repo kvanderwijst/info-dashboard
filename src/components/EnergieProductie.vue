@@ -122,7 +122,7 @@ function fetchAll() {
   ]);
 }
 
-useAutoRefresh(fetchAll, 30 * 60); // refresh every 30 minutes
+useAutoRefresh(fetchAll, 15 * 60); // refresh every 15 minutes
 
 const chartOption = computed(() => ({
   legend: {
