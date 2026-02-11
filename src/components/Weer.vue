@@ -62,10 +62,7 @@
             href="https://www.knmi.nl/nederland-nu/weer/waarschuwingen/gelderland"
             target="_blank"
           >
-            <img
-              class="knmi-warning-map"
-              src="https://cdn.knmi.nl/knmi/map/general/waarschuwing_land_48_new.gif?b918eee23974bdb7aef9f90f9864d54f"
-            />
+            <img class="knmi-warning-map" :src="mapUrl" />
           </a>
         </v-card-text>
       </v-card>
@@ -76,7 +73,8 @@
 <script setup lang="ts">
 import { useTheme } from "vuetify";
 const theme = useTheme();
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
+import { useAutoRefresh } from "@/composables/useAutorefresh";
 
 onMounted(() => {
   // Prevent loading the script multiple times
@@ -95,6 +93,18 @@ onMounted(() => {
   document.body.appendChild(script);
   document.body.appendChild(script2);
 });
+
+const baseUrl =
+  "https://cdn.knmi.nl/knmi/map/general/waarschuwing_land_48_new.gif";
+
+const mapUrl = ref("");
+
+function updateMap() {
+  mapUrl.value = `${baseUrl}?t=${Date.now()}`;
+}
+
+// refresh every 30 minutes
+useAutoRefresh(updateMap, 30 * 60);
 </script>
 
 <style scoped>
