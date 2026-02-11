@@ -30,7 +30,7 @@ import BaseChart from "./BaseChart.vue";
 import type { Ref } from "vue";
 
 import { useEnergyPrices } from "@/composables/useEnergyPrices";
-import { useAutoRefresh } from "@/composables/useAutorefresh";
+import { useAutoRefresh } from "@/composables/useAutoRefresh";
 
 const electricityPrices = useEnergyPrices();
 const gasPrices = useEnergyPrices();

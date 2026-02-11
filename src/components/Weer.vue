@@ -74,7 +74,7 @@
 import { useTheme } from "vuetify";
 const theme = useTheme();
 import { onMounted, ref } from "vue";
-import { useAutoRefresh } from "@/composables/useAutorefresh";
+import { useAutoRefresh } from "@/composables/useAutoRefresh";
 
 onMounted(() => {
   // Prevent loading the script multiple times

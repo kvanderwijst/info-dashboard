@@ -81,7 +81,7 @@ import {
 } from "@vue-leaflet/vue-leaflet";
 import { useLuchtmeetnet } from "@/composables/useLuchtmeetnet";
 import { getLkiStyle } from "@/constants/luchtkwaliteitkleuren";
-import { useAutoRefresh } from "@/composables/useAutorefresh";
+import { useAutoRefresh } from "@/composables/useAutoRefresh";
 
 const {
   stationsById,

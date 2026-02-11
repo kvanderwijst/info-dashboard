@@ -35,7 +35,7 @@ import {
   NedForecastClassification,
   NedActivity,
 } from "@/constants/ned";
-import { useAutoRefresh } from "@/composables/useAutorefresh";
+import { useAutoRefresh } from "@/composables/useAutoRefresh";
 
 const SERIES = [
   {

@@ -20,7 +20,7 @@ import BaseChart from "./BaseChart.vue";
 
 import { useGriepData } from "@/composables/useGriepData";
 import { getCurrentISOWeek } from "@/helpers/weeknum";
-import { useAutoRefresh } from "@/composables/useAutorefresh";
+import { useAutoRefresh } from "@/composables/useAutoRefresh";
 const { weeks, series, fetchGriepData, loading, error } = useGriepData();
 
 useAutoRefresh(fetchGriepData, 2 * 60 * 60); // refresh every 2 hours

@@ -147,7 +147,7 @@ import BaseChart from "./BaseChart.vue";
 import { useHomewizardGas } from "@/composables/useHomewizard";
 import { useOpenMeteo } from "@/composables/useOpenMeteo";
 import { gasverbruik } from "@/data/gasverbruik";
-import { useAutoRefresh } from "@/composables/useAutorefresh";
+import { useAutoRefresh } from "@/composables/useAutoRefresh";
 
 const handleOpenMeteo = useOpenMeteo();
 const gasConsumptionPerHDD_2023_2024 = 0.408;
