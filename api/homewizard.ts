@@ -1,36 +1,15 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { fetchHomewizardValue } from "../lib/fetch_homewizard";
 
-export default async function handler(
-  _req: VercelRequest,
-  res: VercelResponse,
-) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    const nowSeconds = Date.now() / 1000;
-    const url =
-      "https://hwenergy.app/totals" +
-      "?home=488575" +
-      "&identifier=p1dongle/5c2faf0b7fa8_gas" +
-      "&period=1" +
-      `&date=${nowSeconds}` +
-      "&timeZone=Europe/Amsterdam";
-    const upstream = await fetch(url, {
-      headers: {
-        cookie: process.env.HWENERGY_COOKIES as string,
-      },
-    });
-
-    if (!upstream.ok) {
-      return res.status(upstream.status).json({ error: "Upstream failed" });
-    }
-
-    const data = await upstream.json();
-
-    if (!data?.valueDiv) {
-      return res.status(401).json({ error: "Session expired" });
-    }
-
-    res.status(200).json(data);
+    const value = await fetchHomewizardValue();
+    res.status(200).json({ value });
   } catch (err) {
-    res.status(500).json({ error: "Proxy error" });
+    if (err instanceof Error) {
+      return res.status(500).json({ error: err.message });
+    }
+
+    return res.status(500).json({ error: "Unknown error" });
   }
 }

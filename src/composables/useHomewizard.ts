@@ -18,12 +18,7 @@ export function useHomewizardGas() {
 
       const data = await res.json();
 
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(data.valueDiv, "text/html");
-
-      const valueEl = doc.querySelector(".graphValue");
-
-      gasUsage.value = valueEl ? Number(valueEl.textContent) : null;
+      gasUsage.value = data.value;
 
       if (gasUsage.value === null) {
         error.value = true;
