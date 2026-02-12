@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { VercelRequest, VercelResponse } from "@vercel/node";
 
-import { fetchHomewizardValue } from "../../lib/fetch_homewizard";
+import { fetchHomewizardValue } from "../../lib/fetch_homewizard.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
