@@ -17,7 +17,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { error } = await supabase.from("gas_usage_daily").upsert(
       {
         day: new Date().toISOString().slice(0, 10),
-        m3: gas_value,
+        gas_use_m3: gas_value,
       },
       {
         onConflict: "day",
