@@ -175,10 +175,7 @@ function fetchWeather() {
 }
 
 function fetchPreviousGas() {
-  handlePreviousGas.fetchDatabaseData(
-    dateFromToday(-daysBack.value),
-    dateFromToday(1),
-  );
+  handlePreviousGas.fetchData(dateFromToday(-daysBack.value), dateFromToday(1));
 }
 
 function dateFromToday(offset: number): string {

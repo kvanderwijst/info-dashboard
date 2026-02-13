@@ -5,7 +5,7 @@ export function useDatabase(type: string) {
   const loading = ref(false);
   const error = ref<Error | null>(null);
 
-  async function fetchDatabaseData(start_date: string, end_date: string) {
+  async function fetchData(start_date: string, end_date: string) {
     loading.value = true;
     error.value = null;
 
@@ -26,6 +26,6 @@ export function useDatabase(type: string) {
     data,
     loading,
     error,
-    fetchDatabaseData,
+    fetchData,
   };
 }
