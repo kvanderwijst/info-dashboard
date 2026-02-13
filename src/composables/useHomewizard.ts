@@ -1,11 +1,11 @@
 import { ref } from "vue";
 
 export function useHomewizardGas() {
-  const gasUsage = ref<number | null>(null);
+  const currentGasUsage = ref<number | null>(null);
   const loading = ref(false);
   const error = ref(false);
 
-  async function fetchGas() {
+  async function fetchCurrentGas() {
     loading.value = true;
     error.value = false;
 
@@ -18,9 +18,9 @@ export function useHomewizardGas() {
 
       const data = await res.json();
 
-      gasUsage.value = data.value;
+      currentGasUsage.value = data.value;
 
-      if (gasUsage.value === null) {
+      if (currentGasUsage.value === null) {
         error.value = true;
       }
     } catch {
@@ -31,9 +31,9 @@ export function useHomewizardGas() {
   }
 
   return {
-    gasUsage,
+    currentGasUsage,
     loading,
     error,
-    fetchGas,
+    fetchCurrentGas,
   };
 }

@@ -146,7 +146,7 @@ import BaseChart from "./BaseChart.vue";
 
 import { useHomewizardGas } from "@/composables/useHomewizard";
 import { useOpenMeteo } from "@/composables/useOpenMeteo";
-import { gasverbruik } from "@/data/gasverbruik";
+import { useDatabase } from "@/composables/useDatabase";
 import { useAutoRefresh } from "@/composables/useAutoRefresh";
 
 const handleOpenMeteo = useOpenMeteo();
@@ -156,7 +156,12 @@ const gasConsumptionPerHDD = ref(0.458);
 const daysBack = ref(21);
 const baseTempHDD = 15.5;
 
-const { gasUsage, loading, error, fetchGas } = useHomewizardGas();
+const { currentGasUsage, loading, error, fetchCurrentGas } = useHomewizardGas();
+
+const handlePreviousGas = useDatabase("gas_usage_daily");
+const previousGasUsages = computed(() =>
+  handlePreviousGas.data.value.map((d: any) => [d.day, d.value]),
+);
 
 function fetchWeather() {
   handleOpenMeteo.fetchData(
@@ -166,6 +171,13 @@ function fetchWeather() {
     "temperature_2m",
     daysBack.value.toString(),
     "3",
+  );
+}
+
+function fetchPreviousGas() {
+  handlePreviousGas.fetchDatabaseData(
+    dateFromToday(-daysBack.value),
+    dateFromToday(1),
   );
 }
 
@@ -182,9 +194,11 @@ onMounted(() => {
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 2);
   tomorrow.setHours(0, 0, 0, 0);
+
+  fetchPreviousGas();
 });
 
-useAutoRefresh(fetchGas, 5 * 60);
+useAutoRefresh(fetchCurrentGas, 5 * 60);
 useAutoRefresh(fetchWeather, 60 * 60);
 
 let timeout: number | undefined;
@@ -192,6 +206,7 @@ watch(daysBack, (newValue, oldValue) => {
   clearTimeout(timeout);
   timeout = window.setTimeout(() => {
     fetchWeather();
+    fetchPreviousGas();
   }, 300);
 });
 
@@ -290,7 +305,7 @@ const optionHDD = computed(() => ({
       name: "Daadwerkelijke gasverbruik",
       type: "line",
       showSymbol: false,
-      data: gasverbruik.filter(
+      data: previousGasUsages.value.filter(
         (value) => value[0] >= handleOpenMeteo.dataDaily.value?.time?.[0],
       ),
     },
@@ -300,7 +315,7 @@ const optionHDD = computed(() => ({
 const scatterData = computed(() => {
   if (!handleOpenMeteo.dataDaily.value) return [];
 
-  const actualByDate = new Map(gasverbruik as [string, number][]);
+  const actualByDate = new Map(previousGasUsages.value as [string, number][]);
 
   return handleOpenMeteo.dataDaily.value.time
     ?.map((date: string, index: number) => [
@@ -357,7 +372,7 @@ const optionCorrelationHDD = computed(() => ({
   ],
 }));
 
-const actual = computed(() => gasUsage.value ?? 0);
+const actual = computed(() => currentGasUsage.value ?? 0);
 const percentage = computed(() => (actual.value / (gasForDay(0) ?? NaN)) * 100);
 
 const optionUsageGauge = computed(() => ({
