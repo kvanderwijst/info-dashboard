@@ -1,11 +1,17 @@
-export async function fetchHomewizardValue() {
-  const nowSeconds = Date.now() / 1000;
+export async function fetchHomewizardValue(offset_days: number = 0) {
+  // Current time in milliseconds
+  const now = Date.now();
+
+  // Subtract offset (in days)
+  const offsetMs = offset_days * 24 * 60 * 60 * 1000;
+  const targetSeconds = (now - offsetMs) / 1000;
+
   const url =
     "https://hwenergy.app/totals" +
     "?home=488575" +
     "&identifier=p1dongle/5c2faf0b7fa8_gas" +
     "&period=1" +
-    `&date=${nowSeconds}` +
+    `&date=${targetSeconds}` +
     "&timeZone=Europe/Amsterdam";
 
   const upstream = await fetch(url, {
