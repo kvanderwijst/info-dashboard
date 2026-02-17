@@ -164,14 +164,7 @@ const previousGasUsages = computed(() =>
 );
 
 function fetchWeather() {
-  handleOpenMeteo.fetchData(
-    "52.0512",
-    "6.103",
-    "temperature_2m_mean",
-    "temperature_2m",
-    daysBack.value.toString(),
-    "3",
-  );
+  handleOpenMeteo.fetchData(daysBack.value, 3);
 }
 
 function fetchPreviousGas() {
@@ -220,7 +213,7 @@ type DailyGasValue = {
 };
 
 const dailyGasValues = computed<DailyGasValue[]>(() => {
-  const daily = handleOpenMeteo.dataDaily.value;
+  const daily = handleOpenMeteo.data.value;
   if (!daily?.time) return [];
 
   return daily.time.map((time: string, index: number) => ({
@@ -303,21 +296,21 @@ const optionHDD = computed(() => ({
       type: "line",
       showSymbol: false,
       data: previousGasUsages.value.filter(
-        (value) => value[0] >= handleOpenMeteo.dataDaily.value?.time?.[0],
+        (value) => value[0] >= handleOpenMeteo.data.value?.time?.[0],
       ),
     },
   ],
 }));
 
 const scatterData = computed(() => {
-  if (!handleOpenMeteo.dataDaily.value) return [];
+  if (!handleOpenMeteo.data.value) return [];
 
   const actualByDate = new Map(previousGasUsages.value as [string, number][]);
 
-  return handleOpenMeteo.dataDaily.value.time
+  return handleOpenMeteo.data.value.time
     ?.map((date: string, index: number) => [
       date,
-      predictGas(handleOpenMeteo.dataDaily.value.temperature_2m_mean[index], 1),
+      predictGas(handleOpenMeteo.data.value.temperature_2m_mean[index], 1),
     ])
     .filter(([date]: [string, number]) => actualByDate.has(date))
     .map(([date, predicted]: [string, number]) => ({
