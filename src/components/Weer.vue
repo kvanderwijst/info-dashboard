@@ -75,28 +75,28 @@
     <v-col cols="12" md="6">
       <v-card>
         <v-card-text>
-          <highcharts :options="options_temperatuur" />
+          <highcharts :options="options_temperatuur" ref="chartTemperatuur" />
         </v-card-text>
       </v-card>
     </v-col>
     <v-col cols="12" md="6">
       <v-card>
         <v-card-text>
-          <highcharts :options="options_bewolking" />
+          <highcharts :options="options_bewolking" ref="chartBewolking" />
         </v-card-text>
       </v-card>
     </v-col>
     <v-col cols="12" md="6">
       <v-card>
         <v-card-text>
-          <highcharts :options="options_neerslag" />
+          <highcharts :options="options_neerslag" ref="chartNeerslag" />
         </v-card-text>
       </v-card>
     </v-col>
     <v-col cols="12" md="6">
       <v-card>
         <v-card-text>
-          <highcharts :options="options_neerslagsom" />
+          <highcharts :options="options_neerslagsom" ref="chartNeerslagsom" />
         </v-card-text>
       </v-card>
     </v-col>
@@ -155,6 +155,20 @@ const options_bewolking = ref({});
 const options_neerslag = ref({});
 const options_neerslagsom = ref({});
 
+const chartTemperatuur = ref();
+const chartBewolking = ref();
+const chartNeerslag = ref();
+const chartNeerslagsom = ref();
+
+function getCharts() {
+  return [
+    chartTemperatuur.value?.chart,
+    chartBewolking.value?.chart,
+    chartNeerslag.value?.chart,
+    chartNeerslagsom.value?.chart,
+  ].filter(Boolean);
+}
+
 function adjustOptions(options: Options): Options {
   const yAxes: YAxisOptions[] = Array.isArray(options.yAxis)
     ? options.yAxis
@@ -188,10 +202,46 @@ onMounted(async () => {
     options_bewolking.value = adjustOptions(bewolking);
     options_neerslag.value = adjustOptions(neerslag);
     options_neerslagsom.value = adjustOptions(neerslagsom);
+
+    setupSync();
   } catch (error) {
     console.error("KNMI fetch failed:", error);
   }
 });
+
+function setupSync() {
+  const charts = getCharts();
+
+  charts.forEach((chart) => {
+    chart.container.addEventListener("mousemove", function (e: any) {
+      const normalized = chart.pointer.normalize(e);
+      const point = chart.series[0].searchPoint(normalized, true);
+
+      if (!point) return;
+
+      const xValue = point.x;
+
+      charts.forEach((otherChart) => {
+        if (otherChart === chart) return;
+
+        const otherPoint = otherChart.series[0].points.find(
+          (p: any) => p.x === xValue,
+        );
+
+        if (otherPoint) {
+          otherChart.xAxis[0].drawCrosshair(null, otherPoint);
+        }
+      });
+    });
+
+    chart.container.addEventListener("mouseleave", function () {
+      charts.forEach((c) => {
+        c.tooltip.hide();
+        c.xAxis[0].hideCrosshair();
+      });
+    });
+  });
+}
 </script>
 
 <style scoped>
