@@ -120,7 +120,12 @@
               />
             </div>
           </div>
-          <BaseChart :option="optionHDD" />
+          <BaseChart
+            :option="optionHDD"
+            ref="dailyChart"
+            @mouseover="onDailyHover"
+            @mouseout="onMouseOut"
+          />
         </v-card-text>
       </v-card>
     </v-col>
@@ -131,7 +136,12 @@
         </v-card-title>
         <v-card-text>
           <div class="slider-container"></div>
-          <BaseChart :option="optionCorrelationHDD" />
+          <BaseChart
+            :option="optionCorrelationHDD"
+            ref="scatterChart"
+            @mouseover="onScatterHover"
+            @mouseout="onMouseOut"
+          />
         </v-card-text>
       </v-card>
     </v-col>
@@ -139,7 +149,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, watch, toRaw } from "vue";
 import VChart from "vue-echarts";
 import * as echarts from "echarts";
 import BaseChart from "./BaseChart.vue";
@@ -162,6 +172,9 @@ const handlePreviousGas = useDatabase("gas_usage_daily");
 const previousGasUsages = computed(() =>
   handlePreviousGas.data.value.map((d: any) => [d.day, d.value]),
 );
+
+const dailyChart = ref<any>(null);
+const scatterChart = ref<any>(null);
 
 function fetchWeather() {
   handleOpenMeteo.fetchData(daysBack.value, 3);
@@ -187,6 +200,71 @@ onMounted(() => {
 
   fetchPreviousGas();
 });
+
+function onDailyHover(params: any) {
+  const date = params.value[0];
+  console.log("Hovered daily chart:", date);
+  const scatter = scatterChart.value?.getChart();
+  if (!scatter) return;
+  const scatterSeries = scatter.getOption().series[0].data;
+
+  const dataIndex = scatterSeries.findIndex((p: any) => p.date === date);
+
+  if (dataIndex === -1) return;
+
+  scatter.dispatchAction({
+    type: "highlight",
+    seriesIndex: 0,
+    dataIndex,
+  });
+
+  // scatter.dispatchAction({
+  //   type: "showTip",
+  //   seriesIndex: 0,
+  //   dataIndex,
+  // });
+}
+
+function onScatterHover(params: any) {
+  const date = params.data.date;
+  console.log("Hovered scatter chart:", date);
+  const daily = dailyChart.value?.getChart();
+  if (!daily) return;
+  const dailySeries = daily.getOption().series[0].data;
+
+  const dataIndex = dailySeries.findIndex((p: any) => p.value[0] === date);
+
+  if (dataIndex === -1) return;
+
+  daily.dispatchAction({
+    type: "highlight",
+    seriesIndex: 0,
+    dataIndex,
+  });
+
+  // daily.dispatchAction({
+  //   type: "showTip",
+  //   seriesIndex: 0,
+  //   dataIndex,
+  // });
+}
+
+function onMouseOut(params: any) {
+  const scatter = scatterChart.value?.getChart();
+  if (scatter) {
+    scatter.dispatchAction({
+      type: "downplay",
+      seriesIndex: 0,
+    });
+  }
+  const daily = dailyChart.value?.getChart();
+  if (daily) {
+    daily.dispatchAction({
+      type: "downplay",
+      seriesIndex: 0,
+    });
+  }
+}
 
 useAutoRefresh(fetchCurrentGas, 5 * 60);
 useAutoRefresh(fetchWeather, 60 * 60);
@@ -290,6 +368,12 @@ const optionHDD = computed(() => ({
           },
         };
       }),
+      emphasis: {
+        itemStyle: {
+          color: "#8CC16D",
+          shadowBlur: 15,
+        },
+      },
     },
     {
       name: "Daadwerkelijke gasverbruik",
@@ -350,6 +434,15 @@ const optionCorrelationHDD = computed(() => ({
           date: point.date,
         }),
       ),
+      emphasis: {
+        itemStyle: {
+          borderColor: "#000",
+          borderWidth: 2,
+          color: "#8CC16D",
+          shadowBlur: 15,
+        },
+        scale: true,
+      },
     },
     {
       type: "line",

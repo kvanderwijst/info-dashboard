@@ -1,16 +1,23 @@
 <template>
   <v-chart
+    v-bind="attrs"
     :key="chartKey"
     ref="chartRef"
     :option="mergedOption"
     :theme="isDark ? 'dark' : 'light'"
-    @ready="onReady"
     class="chart"
   />
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, computed, watch } from "vue";
+import {
+  ref,
+  onMounted,
+  onBeforeUnmount,
+  computed,
+  watch,
+  useAttrs,
+} from "vue";
 import { useTheme } from "vuetify";
 import merge from "lodash.merge";
 import VChart from "vue-echarts";
@@ -22,8 +29,7 @@ use([MarkLineComponent, MarkAreaComponent]);
 import { useEChartsTheme } from "@/composables/useEChartsTheme";
 
 const { colors, axisColor } = useEChartsTheme();
-
-const chart = ref<EChartsType | null>(null);
+const attrs = useAttrs();
 
 const baseOption = computed(() => ({
   color: colors.value,
@@ -33,10 +39,6 @@ const baseOption = computed(() => ({
 }));
 const mergedOption = computed(() => merge({}, baseOption.value, props.option));
 
-function onReady(instance: EChartsType) {
-  chart.value = instance;
-}
-
 const props = defineProps<{
   option: object;
   height?: number | string;
@@ -44,7 +46,7 @@ const props = defineProps<{
 
 const chartRef = ref<InstanceType<typeof VChart>>();
 defineExpose({
-  getChart: () => chart.value,
+  getChart: () => chartRef.value,
 });
 const theme = useTheme();
 
