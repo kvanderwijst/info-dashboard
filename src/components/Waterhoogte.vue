@@ -7,7 +7,7 @@
       <v-card>
         <v-card-text>
           <iframe
-            src="https://waterinfo.rws.nl/embed/publiek/waterhoogte/Doesburg-brug(DOES)/details?parameters=Waterhoogte___20Oppervlaktewater___20t.o.v.___20Normaal___20Amsterdams___20Peil___20in___20cm&weergave=grafiek&view=map"
+            src="https://waterinfo.rws.nl/embed/publiek/waterhoogte/doesburg.ijssel/details?weergave=grafiek&view=map"
           ></iframe>
         </v-card-text>
       </v-card>
